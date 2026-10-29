@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Tarefas Inteligentes (iOS)
 
 Gerenciador de tarefas feito com **Capacitor (ecossistema Ionic) + Vite + JavaScript puro**.
@@ -91,3 +92,6 @@ src/main.js     interface
 src/styles.css  visual estilo iOS (claro/escuro, safe-area)
 tests/          testes (node --test)
 ```
+=======
+# DESENWEB
+>>>>>>> 6c0e18889acf3ab55cfcb7c1f69f36fb436194c3
