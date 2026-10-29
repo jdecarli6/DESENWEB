@@ -1,0 +1,9 @@
+{
+  "appId": "br.com.exemplo.tarefasinteligentes",
+  "appName": "Tarefas Inteligentes",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#f2f2f7"
+  }
+}
