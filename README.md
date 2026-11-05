@@ -1,97 +1,163 @@
-<<<<<<< HEAD
-# Tarefas Inteligentes (iOS)
+# Gerenciador de Tarefas Inteligente
 
-Gerenciador de tarefas feito com **Capacitor (ecossistema Ionic) + Vite + JavaScript puro**.
-O mesmo código roda no navegador (para desenvolver no Windows) e vira app nativo iOS.
+Trabalho da disciplina **Explorando Tecnologias Móveis** — Universidade Comunitária da Região de Chapecó (Unochapecó).
+Professor: **Cezar Junior de Souza**.
 
-## Funcionalidades
-- Criar, editar e excluir tarefas (título, notas, prazo e hora)
-- Categorias: Trabalho, Estudo, Pessoal, Saúde, Finanças, Outros
-- Prioridade: Alta, Média, Baixa
-- Marcar como concluída
-- Busca (sem diferenciar acento/maiúscula) e filtros por situação, categoria e prioridade
-- Persistência local (Capacitor Preferences no iOS; localStorage no navegador)
+**Integrantes:** ______________________________________________
 
-### O "inteligente"
-- **Adição rápida em linguagem natural** (barra inferior):
-  `Entregar relatório amanhã 14h #trabalho !alta`
-  Entende: hoje, amanhã, depois de amanhã, dia da semana (segunda, "próxima sexta"), `dd/mm`, `dd/mm/aaaa`,
-  "em 3 dias", `14h`, `14h30`, `14:30`, `#categoria` e `!alta|!media|!baixa`.
-- **Sugestão automática** de categoria e prioridade (por palavras-chave e proximidade do prazo) – tanto na
-  adição rápida quanto no formulário (você pode sobrescrever).
-- **Ordenação inteligente**: atrasadas > hoje > amanhã > próximos 7 dias, ponderadas pela prioridade.
-- Resumo no topo (pendentes, para hoje, atrasadas).
+## Sobre o app
 
-## Rodar no navegador (Windows/Mac/Linux)
+Aplicativo de tarefas com categorias, prioridades, busca e filtros, e um pouco de "inteligência": o texto
+livre vira tarefa com prazo, categoria e prioridade. Roda no navegador, como PWA, e como app nativo
+para **Android** (APK) e **iOS** (projeto Xcode) via Capacitor.
+
+Tecnologia escolhida: **Ionic (HTML/CSS/JavaScript + Capacitor)**.
+
+| Camada | Tecnologia |
+|---|---|
+| Interface | Ionic 8 (`@ionic/core`, web components) — JavaScript puro, sem framework |
+| Build web | Vite 6 |
+| App nativo | Capacitor 7 (Android e iOS) |
+| Persistência | `@capacitor/preferences` (nativo) / `localStorage` (navegador) |
+| Testes | `node --test` (módulo nativo do Node, sem dependência extra) |
+
+- `appId`: `br.com.exemplo.tarefasinteligentes`
+- Nome: `Gerenciador de Tarefas Inteligente`
+
+## Funcionalidades (requisitos do TPE)
+
+| Requisito do PDF | Como foi atendido | Onde está no código |
+|---|---|---|
+| Criar, editar e excluir tarefas | Formulário detalhado (botão **+**), edição tocando na tarefa, exclusão deslizando para a esquerda (ou pelo botão no formulário) | `src/store.js` (`add`, `update`, `remove`); `src/main.js` (`openSheet`, `saveForm`, `deleteTask`) |
+| Categorizar (Trabalho, Estudo, Pessoal, etc.) | Seis categorias: Trabalho, Estudo, Pessoal, Saúde, Finanças, Outros | `src/smart.js` (`CATEGORIES`) |
+| Prioridades (Alta, Média, Baixa) | Três níveis com cor e peso, usados na ordenação | `src/smart.js` (`PRIORITIES`) |
+| Marcar como concluída | Toque no círculo ao lado da tarefa; a data de conclusão é guardada | `src/store.js` (`toggle`); `src/main.js` (evento `ionChange` da lista) |
+| Buscar e filtrar | Busca sem diferenciar acento nem maiúscula; filtros por situação (Todas, Pendentes, Concluídas), categoria, prioridade e ordenação | `src/smart.js` (`fold`, `filterTasks`, `sortTasks`); `index.html` (`ion-searchbar`, `ion-segment`, `ion-select`) |
+| Persistência local | Os dados ficam no aparelho (ou no navegador) e continuam após fechar o app | `src/storage.js`; `src/store.js` (`STORAGE_KEY`, `init`) |
+
+### Extras "inteligentes"
+- **Adição rápida em linguagem natural** (barra inferior). Exemplo: `Entregar relatório amanhã 14h #trabalho !alta`
+  - datas: `hoje`, `amanhã`, `depois de amanhã`, dia da semana (`segunda`, `próxima sexta`), `dd/mm`, `dd/mm/aaaa`, `em 3 dias`
+  - horário: `14h`, `14h30`, `14:30`
+  - categoria: `#trabalho`, `#estudo`... ; prioridade: `!alta`, `!media`, `!baixa`
+  - código: `src/smart.js` (`parseQuickAdd`)
+- **Sugestão automática** de categoria e prioridade por palavras-chave e proximidade do prazo — tanto na adição rápida quanto no formulário (o usuário pode trocar). Código: `src/smart.js` (`suggest`, `inferCategory`, `inferPriority`).
+- **Ordenação inteligente**: atrasadas primeiro, depois hoje, amanhã e os próximos 7 dias, ponderadas pela prioridade. Código: `src/smart.js` (`urgencyScore`, `sortTasks`).
+- **Resumo no topo**: pendentes, para hoje e atrasadas. Código: `src/smart.js` (`summarize`).
+
+## Telas
+
+| Lista e resumo | Busca e filtro | Formulário |
+|---|---|---|
+| ![Lista de tarefas](docs/screenshots/tela-lista.png) | ![Busca e filtro](docs/screenshots/tela-busca-filtro.png) | ![Formulário de tarefa](docs/screenshots/tela-formulario.png) |
+
+Capturas em largura de celular (390 px), feitas com o servidor de desenvolvimento.
+
+## Estrutura de pastas
+
+```
+.
+├── index.html              tela única (cabeçalho, lista, barra de adição rápida, folha do formulário)
+├── src/
+│   ├── smart.js            regras puras: categorias, prioridades, datas, texto livre, sugestões, filtros, ordenação
+│   ├── store.js            CRUD + validação + persistência (sem DOM)
+│   ├── storage.js          adaptador: Capacitor Preferences (nativo) ou localStorage (navegador)
+│   ├── main.js             interface: renderização e eventos
+│   ├── ionic.js            inicialização do Ionic, toasts e alertas de confirmação
+│   ├── pwa.js              registro do service worker (só na web)
+│   └── styles.css          visual estilo iOS (claro/escuro, área segura)
+├── tests/                  testes com node --test (regras, persistência e service worker)
+├── public/                 manifest.webmanifest, sw.js (offline), ícones
+├── resources/              ícone e splash de origem (para gerar os ícones nativos)
+├── docs/screenshots/       capturas usadas neste README
+├── android/                projeto Android nativo (Gradle) gerado pelo Capacitor
+├── ios/                    projeto iOS nativo (Xcode) gerado pelo Capacitor
+├── capacitor.config.json   appId, appName e pasta de build (dist)
+├── vite.config.js          build e injeção do cache do service worker
+└── package.json            scripts do projeto
+```
+
+`dist/` (build web), `node_modules/`, `android/app/build/` e `ios/App/Pods/` não vão para o repositório.
+
+## Como rodar no navegador
+
+Requisito: **Node.js 20 ou superior** (testado com Node 22).
+
 ```bash
 npm install
 npm run dev        # abre http://localhost:5173 (use o modo celular do DevTools)
-npm test           # testes das regras e da persistência
 ```
 
-## Gerar o app iOS (requer um Mac com Xcode)
+Outros comandos:
+
+```bash
+npm test           # 27 testes das regras, da persistência e do service worker
+npm run build      # gera o site estático em dist/
+npm run preview    # serve o dist/ gerado, para conferir o build
+```
+
+## Modo offline
+
+- Na **primeira visita** pela web, o `sw.js` guarda o app (HTML, CSS, JS e ícones) no cache. Depois disso ele abre sem internet.
+- O `npm run build` coloca no cache a lista dos arquivos com hash (`vite.config.js`, plugin `precacheServiceWorker`).
+- Os dados ficam no aparelho, então a lista continua disponível offline.
+- No app nativo (Android/iOS) o app já vem empacotado: funciona offline desde a instalação, e o service worker não é usado.
+
+## Android — gerar o APK
+
+**Requisitos (Windows):**
+1. **Node.js** LTS.
+2. **JDK 17** (o Android Studio já traz um JDK; pode-se também instalar o Temurin 17).
+3. **Android Studio** com o **Android SDK** instalado pelo SDK Manager: *Platform 35* e *Build-Tools* (o app compila com `compileSdk 35` e roda a partir do Android 6.0, `minSdk 23`).
+4. Variáveis de ambiente: `JAVA_HOME` apontando para o JDK e `ANDROID_HOME` apontando para o SDK
+   (ex.: `C:\Users\<usuario>\AppData\Local\Android\Sdk`).
+
+**Passos:**
+
 ```bash
 npm install
-npm run build
-npx cap add ios            # só na primeira vez
-npm run assets             # gera ícone e splash a partir de resources/
-npx cap sync ios
-npx cap open ios           # abre o Xcode
-```
-No Xcode: selecione o projeto **App → Signing & Capabilities**, escolha seu *Team*, ajuste o *Bundle Identifier*
-(o mesmo `appId` do `capacitor.config.json`) e rode no iPhone/simulador.
-Depois de cada mudança no código: `npm run ios:sync`.
-
-> Sem Mac: use um build na nuvem com runner macOS (GitHub Actions, Codemagic, Bitrise).
-> Para publicar na App Store é necessária conta Apple Developer.
-
-## Gerar o APK (Android) — funciona no Windows
-Requisitos: Node.js LTS e **Android Studio** (instala o SDK e o JDK necessários).
-```bash
-npm install
-npm run build
-npx cap add android        # só na primeira vez
-npm run assets             # opcional: ícone e splash (use: npx @capacitor/assets generate --android)
-npx cap sync android
-```
-**APK de teste (debug)** – instala direto no celular:
-```bash
+npm run android:sync        # npm run build + npx cap sync android
 cd android
-gradlew.bat assembleDebug
+.\gradlew.bat assembleDebug   # ou, na raiz: npm run android:apk
 ```
-Arquivo gerado: `android/app/build/outputs/apk/debug/app-debug.apk`.
-(Atalho: `npm run android:apk` depois do `cap add android`.)
 
-**APK de distribuição (release)** – pelo Android Studio: `npx cap open android` →
-*Build → Generate Signed App Bundle / APK → APK* → crie/escolha um keystore → variante *release*.
-Guarde o keystore e as senhas: sem eles não dá para atualizar o app depois.
+APK gerado: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-Para instalar o APK: copie para o celular Android, abra o arquivo e permita "instalar apps desconhecidos"
-(ou use `adb install app-debug.apk` com depuração USB).
+Para instalar: copie o `.apk` para o celular Android, abra o arquivo e permita "instalar apps desconhecidos",
+ou use `adb install android/app/build/outputs/apk/debug/app-debug.apk` com depuração USB.
 
-> O APK só roda em Android. iPhone não instala APK: para iOS continua valendo o caminho do Mac/Xcode
-> ou usar como PWA (site adicionado à tela inicial).
+Para abrir o projeto no Android Studio: `npx cap open android`.
 
-## PWA (instalar no iPhone sem Mac)
-O projeto já inclui `manifest.webmanifest`, `sw.js` (funciona offline após a 1ª visita), ícones e as meta tags do iOS.
-1. `npm run build` → gera a pasta `dist/`.
-2. Publique a `dist/` em um endereço **HTTPS** (GitHub Pages, Netlify, Cloudflare Pages, servidor interno com certificado...).
-   Os caminhos são relativos, então funciona em subpastas.
-3. No iPhone, abra o endereço no **Safari** → Compartilhar → **Adicionar à Tela de Início**.
-Para lançar uma nova versão e renovar o cache, altere `VERSION` em `public/sw.js`.
-O service worker não é registrado no app nativo (APK/IPA) nem no `npm run dev`.
+## iOS — gerar o app (requer Mac com Xcode)
 
-## Estrutura
+O IPA só pode ser gerado em um **Mac com Xcode**. O projeto `ios/` já está no repositório.
+
+```bash
+npm install
+npm run ios:sync            # npm run build + npx cap sync ios
+npx cap open ios            # abre o Xcode
 ```
-src/smart.js    regras puras: categorias, datas, parser de texto livre, sugestões, filtros, ordenação
-src/store.js    CRUD + validação + persistência
-src/storage.js  adaptador Preferences (iOS) / localStorage (web)
-src/pwa.js      registro do service worker (somente web)
-public/         manifest, sw.js, ícones (copiados para dist/)
-src/main.js     interface
-src/styles.css  visual estilo iOS (claro/escuro, safe-area)
-tests/          testes (node --test)
-```
-=======
-# DESENWEB
->>>>>>> 6c0e18889acf3ab55cfcb7c1f69f36fb436194c3
+
+No Xcode:
+1. Selecione o projeto **App → Signing & Capabilities** e escolha o seu *Team*.
+2. Confira o *Bundle Identifier* (`br.com.exemplo.tarefasinteligentes`, igual ao `appId` do `capacitor.config.json`).
+3. Escolha um iPhone (simulador ou aparelho) e clique em **Run**.
+
+Para instalar em aparelho real com conta gratuita, a Apple exige assinatura com o Team; para a App Store é preciso a conta Apple Developer.
+Sem Mac: é possível usar um build na nuvem com runner macOS (GitHub Actions, Codemagic, Bitrise) ou testar como PWA pelo Safari
+(Compartilhar → Adicionar à Tela de Início), desde que a pasta `dist/` esteja publicada em HTTPS.
+
+Depois de cada mudança no código: `npm run ios:sync` (ou `npm run android:sync`).
+
+## Comandos resumidos
+
+| Comando | O que faz |
+|---|---|
+| `npm install` | instala as dependências |
+| `npm run dev` | servidor de desenvolvimento (navegador) |
+| `npm test` | testes automatizados |
+| `npm run build` | build web em `dist/` |
+| `npm run android:sync` | build + copia para o projeto Android |
+| `npm run android:apk` | build + sync + gera o APK de debug (Windows, precisa de JDK e SDK) |
+| `npm run ios:sync` | build + copia para o projeto iOS (Mac) |
+| `npx cap open android` / `npx cap open ios` | abre o projeto no Android Studio / Xcode |
