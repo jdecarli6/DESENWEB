@@ -1,14 +1,21 @@
 // Service worker: deixa o app abrir offline depois da primeira visita.
-// Para publicar uma nova versão e forçar atualização do cache, mude VERSION.
+// O cache troca sozinho quando os arquivos do build mudam; para forçar, mude VERSION.
 const VERSION = 'v1';
-const CACHE = `tarefas-inteligentes-${VERSION}`;
+// Arquivos do build com hash (assets/*.js, *.css...). Preenchido no `npm run build` pelo plugin
+// precacheServiceWorker do vite.config.js; no código-fonte (e no `npm run dev`) fica vazio.
+const BUILD = { id: 'dev', assets: [] }; // __PRECACHE__
+const CACHE = `tarefas-inteligentes-${VERSION}-${BUILD.id}`;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png'];
+const PRECACHE = [...new Set([...SHELL, ...BUILD.assets])];
+// O Vite gera <script crossorigin>: a página pede os assets com cabeçalho Origin e o pré-cache
+// não. Com "Vary: Origin" na resposta (vite preview, vários hosts) o match falharia offline.
+const MATCH = { ignoreVary: true };
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((c) => c.addAll(SHELL))
+      .then((c) => c.addAll(PRECACHE))
       .then(() => self.skipWaiting())
   );
 });
@@ -37,14 +44,14 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE).then((c) => c.put('./index.html', copy));
           return res;
         })
-        .catch(() => caches.match('./index.html').then((r) => r || caches.match('./')))
+        .catch(() => caches.match('./index.html', MATCH).then((r) => r || caches.match('./', MATCH)))
     );
     return;
   }
 
   // JS, CSS, imagens: usa o cache e atualiza em segundo plano.
   event.respondWith(
-    caches.match(req).then((cached) => {
+    caches.match(req, MATCH).then((cached) => {
       const network = fetch(req)
         .then((res) => {
           if (res && res.ok) {
