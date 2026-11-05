@@ -1,5 +1,6 @@
-node_modules
-dist
+node_modules/
+dist/
+.overclock-app/
 ios/App/Pods
 ios/App/build
 .DS_Store
