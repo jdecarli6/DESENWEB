@@ -67,6 +67,7 @@ const CONNECTORS = new Set(['para', 'pra', 'as', 'a', 'em', 'no', 'na', 'dia', '
 
 function cleanTitle(raw) {
   let words = raw.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
+  if (words.every((w) => CONNECTORS.has(fold(w).replace(/[,;:\-–]+$/, '')))) return ''; // só sobrou "para", "às"...
   while (words.length > 1 && CONNECTORS.has(fold(words[words.length - 1]))) words.pop();
   while (words.length > 1 && ['as', 'a', 'em', 'dia'].includes(fold(words[0]))) words.shift();
   const t = words.join(' ').replace(/[\s,;:\-–]+$/, '').trim();
@@ -140,16 +141,23 @@ export function parseQuickAdd(text, now = new Date()) {
   const ranges = [];
   const today = toISO(now);
 
+  // Reconhece a 1ª ocorrência de `re` que `fn` aceitar (fn devolve false para recusar e
+  // tentar a próxima) e apaga o trecho de `f` para não ser reconhecido de novo.
   const take = (re, fn) => {
-    const m = re.exec(f);
-    if (!m) return null;
-    const start = m.index + (m[1] ? m[1].length : 0);
-    const end = m.index + m[0].length;
-    const res = fn(m);
-    if (res === false || res === undefined || res === null) return null;
-    ranges.push([start, end]);
-    f = f.slice(0, start) + ' '.repeat(end - start) + f.slice(end);
-    return res;
+    const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
+    for (let m = g.exec(f); m; m = g.exec(f)) {
+      const start = m.index + (m[1] ? m[1].length : 0);
+      const end = m.index + m[0].length;
+      const res = fn(m, f.slice(0, start));
+      if (res === false || res === undefined || res === null) {
+        g.lastIndex = m.index + 1;
+        continue;
+      }
+      ranges.push([start, end]);
+      f = f.slice(0, start) + ' '.repeat(end - start) + f.slice(end);
+      return res;
+    }
+    return null;
   };
 
   // #categoria e !prioridade explícitas
@@ -169,7 +177,10 @@ export function parseQuickAdd(text, now = new Date()) {
       const target = WEEKDAYS.indexOf(m[2]);
       return addDays(today, (target - now.getDay() + 7) % 7 || 7);
     }) ??
-    take(/(^|[^a-z0-9])(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?(?![0-9/])/, (m) => {
+    take(/(^|[^a-z0-9])(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?(?![0-9/])/, (m, before) => {
+      // "1/2", "3/4" são frações: só vira data com dia ou mês de 2 dígitos (05/11, 5/11),
+      // com ano (1/2/27) ou depois de "dia"/"até" ("dia 1/2").
+      if (m[2].length < 2 && m[3].length < 2 && !m[4] && !/(^|[^a-z0-9])(dia|ate)\s+$/.test(before)) return false;
       const day = Number(m[2]);
       const month = Number(m[3]);
       let year = m[4] ? Number(m[4]) : now.getFullYear();
@@ -180,10 +191,14 @@ export function parseQuickAdd(text, now = new Date()) {
       return iso;
     });
 
-  // hora: 14h, 14h30, 14:30, às 14h
-  const time = take(/(^|[^a-z0-9:])(?:(?:as|a)\s+)?(\d{1,2})(?:\s*h\s*(\d{2})?|:(\d{2}))(?![a-z0-9])/, (m) => {
-    const h = Number(m[2]);
-    const min = Number(m[3] ?? m[4] ?? 0);
+  // hora: 14h, 14h30, 14:30, às 9h. "2h" solto é duração ("Comprar pão 2h"), não horário:
+  // hora de 1 dígito só com "às" ou minutos; e nunca logo depois de "por", "durante", "há"...
+  const time = take(/(^|[^a-z0-9:])(?:(as|a)\s+)?(\d{1,2})(?:\s*h\s*(\d{2})?|:(\d{2}))(?![a-z0-9/])/, (m, before) => {
+    const minutes = m[4] ?? m[5];
+    if (!m[2] && !minutes && m[3].length < 2) return false;
+    if (!m[2] && /(^|[^a-z0-9])(por|durante|ha|uns|umas)\s+$/.test(before)) return false;
+    const h = Number(m[3]);
+    const min = Number(minutes ?? 0);
     if (h > 23 || min > 59) return false;
     return `${pad(h)}:${pad(min)}`;
   });
@@ -194,7 +209,8 @@ export function parseQuickAdd(text, now = new Date()) {
   [...ranges].sort((a, b) => b[0] - a[0]).forEach(([s, e]) => {
     title = title.slice(0, s) + ' ' + title.slice(e);
   });
-  title = cleanTitle(title) || original;
+  // Se o texto era só data/hora/tags, não devolve esses tokens como título.
+  title = cleanTitle(title) || (original ? 'Nova tarefa' : '');
 
   const inferredCategory = inferCategory(title);
   const category = tagCategory ?? inferredCategory ?? 'outros';

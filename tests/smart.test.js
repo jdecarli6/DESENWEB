@@ -61,9 +61,43 @@ test('quick add: texto simples e título vazio após parsing', () => {
   assert.equal(r.due, null);
   assert.equal(r.category, 'pessoal');
   assert.equal(r.priority, 'media');
-  assert.equal(parseQuickAdd('amanhã', NOW).title, 'amanhã');
   assert.equal(parseQuickAdd('Coisa sem pista nenhuma', NOW).category, 'outros');
   assert.equal(parseQuickAdd('Item #inexistente', NOW).title, 'Item #inexistente');
+});
+
+test('quick add: texto só com data/hora/tags não repete os tokens no título', () => {
+  const a = parseQuickAdd('amanhã', NOW);
+  assert.equal(a.title, 'Nova tarefa');
+  assert.equal(a.due, '2026-10-30');
+  const b = parseQuickAdd('amanhã #trabalho', NOW);
+  assert.deepEqual([b.title, b.due, b.category], ['Nova tarefa', '2026-10-30', 'trabalho']);
+  const c = parseQuickAdd('para amanhã às 14h !alta', NOW);
+  assert.deepEqual([c.title, c.due, c.time, c.priority], ['Nova tarefa', '2026-10-30', '14:00', 'alta']);
+  assert.equal(parseQuickAdd('', NOW).title, ''); // vazio continua vazio (a validação do formulário barra)
+});
+
+test('quick add: fração não vira data e duração não vira horário', () => {
+  const f = parseQuickAdd('Revisar 1/2 do projeto', NOW);
+  assert.deepEqual([f.title, f.due, f.time], ['Revisar 1/2 do projeto', null, null]);
+  assert.equal(parseQuickAdd('Comer 3/4 da pizza', NOW).due, null);
+  const d = parseQuickAdd('Comprar pão 2h', NOW);
+  assert.deepEqual([d.title, d.due, d.time], ['Comprar pão 2h', null, null]);
+  assert.equal(parseQuickAdd('Estudar por 10h', NOW).time, null);
+  assert.equal(parseQuickAdd('Treinar durante 2h30', NOW).time, null);
+  // fração antes de uma data de verdade: a data ainda é reconhecida
+  const r = parseQuickAdd('Revisar 1/2 do projeto até 05/11', NOW);
+  assert.deepEqual([r.title, r.due], ['Revisar 1/2 do projeto', '2026-11-05']);
+});
+
+test('quick add: datas e horários legítimos continuam reconhecidos', () => {
+  assert.equal(parseQuickAdd('Pagar conta 5/11', NOW).due, '2026-11-05');
+  assert.equal(parseQuickAdd('Prova dia 1/2', NOW).due, '2027-02-01');
+  assert.equal(parseQuickAdd('Prova 1/2/27', NOW).due, '2027-02-01');
+  assert.equal(parseQuickAdd('Dentista às 9h', NOW).time, '09:00');
+  assert.equal(parseQuickAdd('Dentista 9h30', NOW).time, '09:30');
+  assert.equal(parseQuickAdd('Dentista 9:30', NOW).time, '09:30');
+  const r = parseQuickAdd('Reunião 14h', NOW);
+  assert.deepEqual([r.title, r.due, r.time], ['Reunião', TODAY, '14:00']);
 });
 
 test('prioridade por palavras-chave', () => {
