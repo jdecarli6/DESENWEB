@@ -68,3 +68,93 @@ test('assinantes são notificados', async () => {
   await store.add({ title: 'a' });
   assert.equal(calls, 2);
 });
+
+/** Armazenamento que falha nas próximas `failures` gravações. */
+const flaky = (initial) => {
+  const inner = createMemoryStorage(initial);
+  const s = {
+    failures: 0,
+    get: (key) => inner.get(key),
+    async set(key, value) {
+      if (s.failures > 0) {
+        s.failures--;
+        throw new Error('QuotaExceededError');
+      }
+      return inner.set(key, value);
+    }
+  };
+  return s;
+};
+
+const stored = async (storage) => JSON.parse(await storage.get(STORAGE_KEY)).tasks.map((t) => t.title);
+
+test('falha ao salvar: add rejeita, desfaz a mudança e avisa os assinantes', async () => {
+  const { storage, store } = make(flaky());
+  await store.init();
+  await store.add({ title: 'Salva' });
+  const seen = [];
+  store.subscribe((tasks) => seen.push(tasks.map((t) => t.title)));
+
+  storage.failures = 1;
+  await assert.rejects(store.add({ title: 'Perdida' }), (err) => err instanceof Error && /salvar/i.test(err.message) && /Quota/.test(err.cause.message));
+  assert.deepEqual(store.getAll().map((t) => t.title), ['Salva']);
+  assert.deepEqual(seen, [['Perdida', 'Salva'], ['Salva']]); // otimista e depois desfeito
+  assert.deepEqual(await stored(storage), ['Salva']);
+});
+
+test('falha ao salvar: update, toggle e remove desfazem a mudança', async () => {
+  const { storage, store } = make(flaky());
+  await store.init();
+  const a = await store.add({ title: 'Original', priority: 'baixa' });
+
+  storage.failures = 1;
+  await assert.rejects(store.update(a.id, { title: 'Editada', priority: 'alta' }), Error);
+  assert.deepEqual(store.get(a.id), a);
+
+  storage.failures = 1;
+  await assert.rejects(store.toggle(a.id), Error);
+  assert.equal(store.get(a.id).done, false);
+
+  storage.failures = 1;
+  await assert.rejects(store.remove(a.id), Error);
+  assert.deepEqual(store.getAll(), [a]);
+
+  const reopened = createStore(storage);
+  await reopened.init();
+  assert.deepEqual(reopened.getAll(), [a]);
+});
+
+test('falha ao salvar: a fila não trava e o que está gravado bate com a tela', async () => {
+  const { storage, store } = make(flaky());
+  await store.init();
+  await store.add({ title: 'A' });
+
+  // gravações concorrentes: a do meio falha, as outras seguem
+  const b = store.add({ title: 'B' });
+  const c = store.add({ title: 'C' });
+  const d = store.add({ title: 'D' });
+  const set = storage.set;
+  let call = 0;
+  storage.set = (k, v) => (++call === 2 ? Promise.reject(new Error('falhou')) : set(k, v));
+  const results = await Promise.allSettled([b, c, d]);
+  storage.set = set;
+
+  assert.deepEqual(results.map((r) => r.status), ['fulfilled', 'rejected', 'fulfilled']);
+  assert.deepEqual(store.getAll().map((t) => t.title), ['D', 'B', 'A']);
+  assert.deepEqual(await stored(storage), ['D', 'B', 'A']);
+
+  // depois da falha, novas gravações continuam funcionando
+  await store.add({ title: 'E' });
+  assert.deepEqual(await stored(storage), ['E', 'D', 'B', 'A']);
+});
+
+test('sucesso não muda o contrato: add/update/toggle devolvem a tarefa e remove devolve undefined', async () => {
+  const { store } = make();
+  await store.init();
+  const a = await store.add({ title: 'x' });
+  assert.equal(typeof a.id, 'string');
+  assert.equal((await store.update(a.id, { title: 'y' })).title, 'y');
+  assert.equal((await store.toggle(a.id)).done, true);
+  assert.equal(await store.toggle('inexistente'), null);
+  assert.equal(await store.remove(a.id), undefined);
+});

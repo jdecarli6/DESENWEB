@@ -34,18 +34,40 @@ export function sanitize(input) {
 }
 
 export function createStore(storage, { now = () => Date.now(), uid = defaultUid } = {}) {
-  let tasks = [];
+  let saved = []; // último estado gravado com sucesso
+  let tasks = []; // o que a tela mostra: `saved` + mudanças ainda em gravação
+  const pending = []; // mudanças aplicadas em memória aguardando a gravação
   const listeners = new Set();
   let writing = Promise.resolve();
 
   const emit = () => listeners.forEach((fn) => fn(tasks));
 
-  const persist = () => {
-    const payload = JSON.stringify({ version: 1, tasks });
-    // escritas em fila para nunca gravar fora de ordem
-    writing = writing.then(() => storage.set(STORAGE_KEY, payload)).catch((e) => console.error('Falha ao salvar', e));
-    return writing;
+  // Aplica a mudança na memória na hora e grava em fila (nunca fora de ordem). Cada gravação
+  // grava `saved` + a mudança, então uma mudança que falhou nunca vai parar no armazenamento.
+  // Se a gravação falhar, a mudança é desfeita (a tela volta a bater com o que está gravado)
+  // e a promessa rejeita com Error; a fila continua andando para as próximas.
+  const commit = (change) => {
+    pending.push(change);
+    tasks = change(tasks);
+    emit();
+    const run = writing.then(async () => {
+      const next = change(saved);
+      try {
+        await storage.set(STORAGE_KEY, JSON.stringify({ version: 1, tasks: next }));
+      } catch (e) {
+        pending.splice(pending.indexOf(change), 1);
+        tasks = pending.reduce((list, fn) => fn(list), saved);
+        emit();
+        throw new Error('Não foi possível salvar a alteração. Tente novamente.', { cause: e });
+      }
+      saved = next;
+      pending.splice(pending.indexOf(change), 1);
+    });
+    writing = run.catch(() => {}); // uma falha não trava a fila
+    return run;
   };
+
+  const replace = (next) => (list) => list.map((t) => (t.id === next.id ? next : t));
 
   return {
     async init() {
@@ -59,6 +81,7 @@ export function createStore(storage, { now = () => Date.now(), uid = defaultUid 
           tasks = [];
         }
       }
+      saved = tasks;
       emit();
     },
     getAll: () => tasks,
@@ -70,18 +93,14 @@ export function createStore(storage, { now = () => Date.now(), uid = defaultUid 
     async add(input) {
       const ts = now();
       const task = { id: uid(), ...sanitize(input), done: false, doneAt: null, createdAt: ts, updatedAt: ts };
-      tasks = [task, ...tasks];
-      emit();
-      await persist();
+      await commit((list) => [task, ...list]);
       return task;
     },
     async update(id, patch) {
       const current = tasks.find((t) => t.id === id);
       if (!current) throw new Error('Tarefa não encontrada.');
       const next = { ...current, ...sanitize({ ...current, ...patch }), updatedAt: now() };
-      tasks = tasks.map((t) => (t.id === id ? next : t));
-      emit();
-      await persist();
+      await commit(replace(next));
       return next;
     },
     async toggle(id) {
@@ -89,15 +108,11 @@ export function createStore(storage, { now = () => Date.now(), uid = defaultUid 
       if (!current) return null;
       const done = !current.done;
       const next = { ...current, done, doneAt: done ? now() : null, updatedAt: now() };
-      tasks = tasks.map((t) => (t.id === id ? next : t));
-      emit();
-      await persist();
+      await commit(replace(next));
       return next;
     },
     async remove(id) {
-      tasks = tasks.filter((t) => t.id !== id);
-      emit();
-      await persist();
+      await commit((list) => list.filter((t) => t.id !== id));
     }
   };
 }
