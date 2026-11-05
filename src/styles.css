@@ -1,100 +1,48 @@
+/* Estilos do app por cima do tema do Ionic (ionic.bundle.css, importado em ionic.js). */
 :root {
-  --bg: #f2f2f7;
-  --card: #ffffff;
-  --text: #111114;
-  --muted: #6c6c70;
-  --line: rgba(60, 60, 67, 0.18);
+  --ion-color-primary: #0a84ff;
+  --ion-color-primary-rgb: 10, 132, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #0974e0;
+  --ion-color-primary-tint: #2390ff;
+  --ion-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --muted: var(--ion-color-step-600, var(--ion-text-color-step-400, #6c6c70));
   --fill: rgba(118, 118, 128, 0.12);
-  --accent: #0a84ff;
-  --danger: #ff3b30;
-  --ok: #34c759;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;
-    --card: #1c1c1e;
-    --text: #f5f5f7;
-    --muted: #98989f;
-    --line: rgba(84, 84, 88, 0.55);
     --fill: rgba(118, 118, 128, 0.24);
-    --accent: #0a84ff;
   }
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+[hidden] {
+  display: none !important;
 }
 
-html,
-body {
-  margin: 0;
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  -webkit-text-size-adjust: 100%;
-  overscroll-behavior: none;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
-
-button {
-  cursor: pointer;
-  border: 0;
-  background: none;
-}
-
-#app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
+ion-app {
   max-width: 720px;
   margin: 0 auto;
-  position: relative;
 }
 
-.scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: calc(var(--safe-top) + 8px) 16px 24px;
+ion-content {
+  --background: var(--ion-color-light, #f2f2f7);
 }
 
-/* ---------- cabeçalho ---------- */
-.title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 52px;
+ion-content::part(scroll) {
+  padding-bottom: 88px; /* espaço para o FAB não cobrir a última tarefa */
 }
 
-h1 {
-  margin: 0;
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+/* Campos de texto com pelo menos 16px: o iOS não dá zoom ao focar */
+ion-input,
+ion-textarea,
+ion-select,
+ion-searchbar .searchbar-input {
+  font-size: 16px !important;
 }
 
-.icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--accent);
-  color: #fff;
+.pad {
+  padding: 12px 16px 0;
 }
 
 .summary {
@@ -105,60 +53,16 @@ h1 {
 }
 
 .summary .warn {
-  color: var(--danger);
+  color: var(--ion-color-danger);
   font-weight: 600;
 }
 
-.search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--fill);
-  border-radius: 12px;
-  padding: 0 12px;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-
-.search input {
-  flex: 1;
-  height: 38px;
-  border: 0;
-  background: none;
-  outline: none;
-  font-size: 16px;
-  min-width: 0;
-}
-
-/* ---------- controles ---------- */
-.segmented {
-  display: flex;
-  background: var(--fill);
-  border-radius: 10px;
-  padding: 2px;
-  gap: 2px;
-}
-
-.segmented button {
-  flex: 1;
-  padding: 7px 6px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.segmented button.on {
-  background: var(--card);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  font-weight: 650;
-}
-
+/* ---------- chips de categoria ---------- */
 .chips {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   overflow-x: auto;
-  padding: 12px 0 4px;
+  padding: 10px 0 2px;
   scrollbar-width: none;
 }
 
@@ -172,98 +76,74 @@ h1 {
   padding-top: 4px;
 }
 
-.chip {
+ion-chip {
   flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: var(--fill);
-  font-size: 14px;
+  margin: 0;
+  --background: var(--fill);
+  --color: var(--ion-text-color, #111);
   font-weight: 500;
-  white-space: nowrap;
 }
 
-.chip i {
+ion-chip i {
   width: 9px;
   height: 9px;
   border-radius: 50%;
+  margin-right: 6px;
   background: var(--c, var(--muted));
 }
 
-.chip.on {
-  background: var(--accent);
-  color: #fff;
+ion-chip.on {
+  --background: var(--ion-color-primary);
+  --color: #fff;
 }
 
-.chip.on i {
+ion-chip.on i {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
 }
 
-.filters-row {
-  display: flex;
-  gap: 12px;
-  margin: 8px 0 16px;
+ion-chip:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
 }
 
-.filters-row label {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+/* ---------- filtros ---------- */
+ion-list.filters {
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.swipe-hint {
+  margin: 12px 32px 0;
   font-size: 13px;
   color: var(--muted);
 }
 
-select {
-  flex: 1;
-  min-width: 0;
-  background: var(--fill);
-  border: 0;
-  border-radius: 8px;
-  padding: 7px 8px;
-  font-size: 15px;
-}
-
 /* ---------- lista ---------- */
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+#list {
+  margin-top: 6px;
 }
 
 .task {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  background: var(--card);
-  border-radius: 14px;
-  padding: 12px 14px;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
 }
 
-.check {
-  flex: none;
-  width: 26px;
-  height: 26px;
-  margin-top: 1px;
-  border-radius: 50%;
-  border: 2.5px solid var(--p, var(--muted));
-  display: grid;
-  place-items: center;
-  color: transparent;
-}
-
-.task.done .check {
-  background: var(--p, var(--muted));
-  color: #fff;
+.task ion-checkbox {
+  --size: 24px;
+  --border-radius: 50%;
+  --border-width: 2.5px;
+  --border-color: var(--p);
+  --checkbox-background-checked: var(--p);
+  --border-color-checked: var(--p);
+  margin-inline-end: 12px;
+  align-self: flex-start;
+  margin-top: 12px;
 }
 
 .task .body {
-  flex: 1;
-  min-width: 0;
   cursor: pointer;
+  white-space: normal;
+  margin: 10px 0;
 }
 
 .task .title {
@@ -295,7 +175,7 @@ select {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 10px;
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 13px;
   color: var(--muted);
 }
@@ -322,12 +202,12 @@ select {
 }
 
 .due.overdue {
-  color: var(--danger);
+  color: var(--ion-color-danger);
   font-weight: 600;
 }
 
 .due.today {
-  color: var(--accent);
+  color: var(--ion-color-primary);
   font-weight: 600;
 }
 
@@ -338,13 +218,13 @@ select {
 .empty {
   text-align: center;
   color: var(--muted);
-  padding: 48px 16px;
+  padding: 48px 24px;
   line-height: 1.5;
 }
 
 .empty strong {
   display: block;
-  color: var(--text);
+  color: var(--ion-text-color, #111);
   font-size: 18px;
   margin-bottom: 6px;
 }
@@ -352,137 +232,40 @@ select {
 /* ---------- adição rápida ---------- */
 .quick {
   display: flex;
+  align-items: center;
   gap: 8px;
-  padding: 10px 16px calc(var(--safe-bottom) + 10px);
-  background: var(--bg);
-  border-top: 1px solid var(--line);
+  padding: 4px 8px;
 }
 
-.quick input {
+.quick ion-input {
   flex: 1;
   min-width: 0;
-  height: 44px;
-  border: 0;
-  outline: none;
-  border-radius: 22px;
-  padding: 0 16px;
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
-  font-size: 16px;
+  --background: var(--ion-background-color, #fff);
+  min-height: 44px !important;
 }
 
-.quick input:focus {
-  box-shadow: inset 0 0 0 2px var(--accent);
-}
-
-.send {
-  flex: none;
+.quick ion-button {
+  margin: 0;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  display: grid;
-  place-items: center;
+  --padding-start: 0;
+  --padding-end: 0;
 }
 
-.toast {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: calc(var(--safe-bottom) + 76px);
-  background: rgba(40, 40, 44, 0.95);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.35;
-  text-align: center;
-  z-index: 5;
+/* ---------- formulário (ion-modal) ---------- */
+#sheet ion-content {
+  --background: var(--ion-color-light, #f2f2f7);
 }
 
-.toast[hidden] {
-  display: none;
-}
-
-/* ---------- formulário ---------- */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  z-index: 10;
-}
-
-.overlay[hidden] {
-  display: none;
-}
-
-.sheet {
-  width: 100%;
-  max-width: 720px;
-  max-height: 92vh;
-  max-height: 92dvh;
-  background: var(--bg);
-  border-radius: 20px 20px 0 0;
-  display: flex;
-  flex-direction: column;
-  animation: up 0.22s ease-out;
-}
-
-@keyframes up {
-  from {
-    transform: translateY(40px);
-    opacity: 0;
-  }
-}
-
-.sheet-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid var(--line);
-}
-
-.sheet-head h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.link {
-  color: var(--accent);
-  font-size: 17px;
-  padding: 4px;
-}
-
-.link.strong {
-  font-weight: 700;
-}
-
-.link.small {
-  font-size: 14px;
-  align-self: flex-start;
-  padding: 0;
-}
-
-.sheet-body {
-  overflow-y: auto;
-  padding: 16px 16px calc(var(--safe-bottom) + 20px);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.form-list {
+  margin: 0 0 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1;
-  min-width: 0;
+  margin: 0 4px 16px;
 }
 
 .label {
@@ -497,56 +280,31 @@ select {
   font-style: normal;
   text-transform: none;
   letter-spacing: 0;
-  color: var(--accent);
+  color: var(--ion-color-primary);
   margin-left: 6px;
 }
 
-.field input,
-.field textarea {
-  width: 100%;
-  background: var(--card);
-  border: 0;
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: 17px;
-  outline: none;
-  resize: none;
-  box-shadow: inset 0 0 0 1px var(--line);
-  min-height: 46px;
-}
-
-.field input:focus,
-.field textarea:focus {
-  box-shadow: inset 0 0 0 2px var(--accent);
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-}
-
 .error {
-  margin: 0;
-  color: var(--danger);
+  margin: 8px 4px;
   font-size: 14px;
 }
 
-.error[hidden],
-.hint[hidden],
-.danger[hidden] {
-  display: none;
+#t-delete {
+  margin-top: 16px;
 }
 
-.danger {
-  color: var(--danger);
-  background: var(--card);
-  border-radius: 12px;
-  padding: 13px;
+ion-alert .alert-danger {
+  color: var(--ion-color-danger) !important;
+}
+
+ion-segment-button {
+  text-transform: none;
+  letter-spacing: 0;
+  min-width: 0;
   font-weight: 600;
-  font-size: 17px;
 }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+/* toast não cobre o botão flutuante de nova tarefa */
+ion-toast {
+  --end: 88px;
 }

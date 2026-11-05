@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
@@ -10,105 +10,133 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Tarefas" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>Tarefas Inteligentes</title>
+    <title>Gerenciador de Tarefas Inteligente</title>
     <link rel="icon" href="/icons/icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <div id="app">
-      <div id="scroll" class="scroll">
-        <header class="header">
-          <div class="title-row">
-            <h1>Tarefas</h1>
-            <button id="btn-new" class="icon-btn" type="button" aria-label="Nova tarefa (detalhada)">
-              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none" /></svg>
-            </button>
+    <ion-app>
+      <div class="ion-page" id="main-page">
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>Tarefas</ion-title>
+          </ion-toolbar>
+          <ion-toolbar>
+            <ion-searchbar id="search" placeholder="Buscar tarefas" aria-label="Buscar tarefas" debounce="0" autocapitalize="off" enterkeyhint="search"></ion-searchbar>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content id="content">
+          <div class="pad">
+            <p id="summary" class="summary" aria-live="polite"></p>
+
+            <ion-segment id="status" value="all" aria-label="Filtrar por situação">
+              <ion-segment-button value="all"><ion-label>Todas</ion-label></ion-segment-button>
+              <ion-segment-button value="pending"><ion-label>Pendentes</ion-label></ion-segment-button>
+              <ion-segment-button value="done"><ion-label>Concluídas</ion-label></ion-segment-button>
+            </ion-segment>
+
+            <div id="chips" class="chips" role="group" aria-label="Filtrar por categoria"></div>
           </div>
-          <p id="summary" class="summary" aria-live="polite"></p>
 
-          <div class="search">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2" fill="none" /><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
-            <input id="search" type="search" placeholder="Buscar tarefas" autocomplete="off" autocapitalize="off" enterkeyhint="search" aria-label="Buscar tarefas" />
-          </div>
+          <ion-list inset="true" class="filters">
+            <ion-item>
+              <ion-select id="f-priority" label="Prioridade" interface="popover" value="all">
+                <ion-select-option value="all">Todas</ion-select-option>
+                <ion-select-option value="alta">Alta</ion-select-option>
+                <ion-select-option value="media">Média</ion-select-option>
+                <ion-select-option value="baixa">Baixa</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-select id="f-sort" label="Ordenar" interface="popover" value="smart">
+                <ion-select-option value="smart">Inteligente</ion-select-option>
+                <ion-select-option value="due">Prazo</ion-select-option>
+                <ion-select-option value="priority">Prioridade</ion-select-option>
+                <ion-select-option value="recent">Mais recentes</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
 
-          <div id="status" class="segmented" role="group" aria-label="Filtrar por situação">
-            <button type="button" data-status="all" class="on">Todas</button>
-            <button type="button" data-status="pending">Pendentes</button>
-            <button type="button" data-status="done">Concluídas</button>
-          </div>
+          <p id="swipe-hint" class="swipe-hint" hidden>Toque numa tarefa para editar · arraste para a esquerda para excluir</p>
+          <ion-list id="list" inset="true" aria-label="Tarefas"></ion-list>
+          <div id="empty" class="empty" aria-live="polite" hidden></div>
 
-          <div id="chips" class="chips" role="group" aria-label="Filtrar por categoria"></div>
+          <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+            <ion-fab-button id="btn-new" aria-label="Nova tarefa (detalhada)">
+              <ion-icon name="add" aria-hidden="true"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+        </ion-content>
 
-          <div class="filters-row">
-            <label>Prioridade
-              <select id="f-priority">
-                <option value="all">Todas</option>
-                <option value="alta">Alta</option>
-                <option value="media">Média</option>
-                <option value="baixa">Baixa</option>
-              </select>
-            </label>
-            <label>Ordenar
-              <select id="f-sort">
-                <option value="smart">Inteligente</option>
-                <option value="due">Prazo</option>
-                <option value="priority">Prioridade</option>
-                <option value="recent">Mais recentes</option>
-              </select>
-            </label>
-          </div>
-        </header>
-
-        <main id="list" class="list" aria-live="polite"></main>
+        <ion-footer id="quick-footer">
+          <ion-toolbar>
+            <form id="quick" class="quick" autocomplete="off">
+              <ion-input id="quick-input" placeholder="Ex.: Reunião amanhã 14h #trabalho !alta" enterkeyhint="send" aria-label="Adicionar tarefa rapidamente" maxlength="200" fill="outline" shape="round"></ion-input>
+              <ion-button type="submit" shape="round" aria-label="Adicionar tarefa">
+                <ion-icon slot="icon-only" name="arrow-up" aria-hidden="true"></ion-icon>
+              </ion-button>
+            </form>
+          </ion-toolbar>
+        </ion-footer>
       </div>
 
-      <form id="quick" class="quick" autocomplete="off">
-        <input id="quick-input" type="text" placeholder="Ex.: Reunião amanhã 14h #trabalho !alta" enterkeyhint="send" aria-label="Adicionar tarefa rapidamente" maxlength="200" />
-        <button type="submit" class="send" aria-label="Adicionar tarefa">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 19V6M6 11l6-6 6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg>
-        </button>
-      </form>
+      <!-- Formulário de criar/editar -->
+      <ion-modal id="sheet" aria-labelledby="sheet-title">
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-button id="f-cancel">Cancelar</ion-button>
+            </ion-buttons>
+            <ion-title id="sheet-title">Nova tarefa</ion-title>
+            <ion-buttons slot="end">
+              <ion-button id="f-save" strong="true">Salvar</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <form id="task-form" novalidate autocomplete="off">
+            <ion-list inset="true" class="form-list">
+              <ion-item>
+                <ion-input id="t-title" label="Título" label-placement="stacked" maxlength="120" placeholder="O que precisa ser feito?"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-textarea id="t-notes" label="Notas" label-placement="stacked" rows="3" auto-grow="true" maxlength="2000" placeholder="Detalhes (opcional)"></ion-textarea>
+              </ion-item>
+            </ion-list>
 
-      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-    </div>
+            <div class="field">
+              <span class="label" id="lbl-cat">Categoria <em id="hint-cat" class="hint" hidden>✨ sugerida</em></span>
+              <div id="t-cats" class="chips wrap" role="radiogroup" aria-labelledby="lbl-cat"></div>
+            </div>
 
-    <!-- Formulário de criar/editar -->
-    <div id="sheet" class="overlay" hidden>
-      <form id="task-form" class="sheet" novalidate autocomplete="off" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-        <div class="sheet-head">
-          <button type="button" id="f-cancel" class="link">Cancelar</button>
-          <h2 id="sheet-title">Nova tarefa</h2>
-          <button type="submit" class="link strong">Salvar</button>
-        </div>
-        <div class="sheet-body">
-          <label class="field">
-            <span class="label">Título</span>
-            <input id="t-title" type="text" maxlength="120" placeholder="O que precisa ser feito?" />
-          </label>
-          <label class="field">
-            <span class="label">Notas</span>
-            <textarea id="t-notes" rows="3" maxlength="2000" placeholder="Detalhes (opcional)"></textarea>
-          </label>
-          <div class="field">
-            <span class="label">Categoria <em id="hint-cat" class="hint" hidden>✨ sugerida</em></span>
-            <div id="t-cats" class="chips wrap" role="radiogroup" aria-label="Categoria"></div>
-          </div>
-          <div class="field">
-            <span class="label">Prioridade <em id="hint-pri" class="hint" hidden>✨ sugerida</em></span>
-            <div id="t-pri" class="segmented" role="radiogroup" aria-label="Prioridade"></div>
-          </div>
-          <div class="row">
-            <label class="field"><span class="label">Data</span><input id="t-due" type="date" /></label>
-            <label class="field"><span class="label">Hora</span><input id="t-time" type="time" /></label>
-          </div>
-          <button type="button" id="t-clear-due" class="link small">Remover prazo</button>
-          <p id="t-error" class="error" role="alert" hidden></p>
-          <button type="button" id="t-delete" class="danger" hidden>Excluir tarefa</button>
-        </div>
-      </form>
-    </div>
+            <div class="field">
+              <span class="label" id="lbl-pri">Prioridade <em id="hint-pri" class="hint" hidden>✨ sugerida</em></span>
+              <ion-segment id="t-pri" value="media" aria-labelledby="lbl-pri">
+                <ion-segment-button value="alta"><ion-label>Alta</ion-label></ion-segment-button>
+                <ion-segment-button value="media"><ion-label>Média</ion-label></ion-segment-button>
+                <ion-segment-button value="baixa"><ion-label>Baixa</ion-label></ion-segment-button>
+              </ion-segment>
+            </div>
+
+            <ion-list inset="true" class="form-list">
+              <ion-item>
+                <ion-input id="t-due" type="date" label="Data" label-placement="stacked"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input id="t-time" type="time" label="Hora" label-placement="stacked"></ion-input>
+              </ion-item>
+            </ion-list>
+            <ion-button id="t-clear-due" fill="clear" size="small">Remover prazo</ion-button>
+
+            <ion-text color="danger"><p id="t-error" class="error" role="alert" hidden></p></ion-text>
+            <ion-button id="t-delete" expand="block" color="danger" fill="outline" hidden>Excluir tarefa</ion-button>
+            <button type="submit" hidden></button>
+          </form>
+        </ion-content>
+      </ion-modal>
+    </ion-app>
 
     <script type="module" src="/src/main.js"></script>
   </body>

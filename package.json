@@ -1,9 +1,9 @@
 {
-  "name": "tarefas-inteligentes",
+  "name": "gerenciador-de-tarefas-inteligente",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Gerenciador de tarefas inteligente (Capacitor + Vite) para iOS",
+  "description": "Gerenciador de Tarefas Inteligente (Ionic + Capacitor + Vite) para iOS e Android",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -17,10 +17,12 @@
     "android:apk": "npm run build && npx cap sync android && cd android && gradlew.bat assembleDebug"
   },
   "dependencies": {
+    "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "@capacitor/ios": "^7.0.0",
     "@capacitor/preferences": "^7.0.0",
-    "@capacitor/android": "^7.0.0"
+    "@ionic/core": "^8.8.19",
+    "ionicons": "^8.1.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",

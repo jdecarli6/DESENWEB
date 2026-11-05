@@ -1,6 +1,6 @@
 {
-  "name": "Tarefas Inteligentes",
-  "short_name": "Tarefas",
+  "name": "Gerenciador de Tarefas Inteligente",
+  "short_name": "Gerenciador de Tarefas",
   "description": "Gerenciador de tarefas com categorias, prioridades e adição rápida em linguagem natural.",
   "lang": "pt-BR",
   "start_url": "./",
