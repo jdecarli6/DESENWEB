@@ -3,7 +3,7 @@
 Trabalho da disciplina **Explorando Tecnologias Móveis** — Universidade Comunitária da Região de Chapecó (Unochapecó).
 Professor: **Cezar Junior de Souza**.
 
-**Integrantes:** ______________________________________________
+**Integrantes:** Bernardo Dal Piva Bernardi, João Victor Decarli e Rafael Rockenbach
 
 ## Sobre o app
 
