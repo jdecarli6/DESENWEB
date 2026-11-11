@@ -107,7 +107,7 @@ npm run preview    # serve o dist/ gerado, para conferir o build
 
 **Requisitos (Windows):**
 1. **Node.js** LTS.
-2. **JDK 17** (o Android Studio já traz um JDK; pode-se também instalar o Temurin 17).
+2. **JDK 21** (o Android Studio já traz um JDK; pode-se também instalar o Temurin 21).
 3. **Android Studio** com o **Android SDK** instalado pelo SDK Manager: *Platform 35* e *Build-Tools* (o app compila com `compileSdk 35` e roda a partir do Android 6.0, `minSdk 23`).
 4. Variáveis de ambiente: `JAVA_HOME` apontando para o JDK e `ANDROID_HOME` apontando para o SDK
    (ex.: `C:\Users\<usuario>\AppData\Local\Android\Sdk`).
