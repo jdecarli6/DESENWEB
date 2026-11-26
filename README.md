@@ -96,6 +96,18 @@ npm run build      # gera o site estático em dist/
 npm run preview    # serve o dist/ gerado, para conferir o build
 ```
 
+## Abrir no celular pelo QR code
+
+Sem instalar nada no celular: o computador que roda o sistema serve o app na rede Wi-Fi local (nada vai para a internet).
+
+- **Windows:** dois cliques em `Abrir no celular.bat`. **Mac/Linux:** `npm run celular`.
+- Aparece um QR code no terminal e numa página do navegador (também salvo em `qrcode-celular.png`). No celular: abra a câmera e aponte para o QR.
+- Celular e computador precisam estar **no mesmo Wi-Fi**. O computador fica ligado com a janela aberta; feche a janela para desligar.
+- Na primeira vez o Windows pode perguntar se permite acesso à rede: marque **Redes privadas** e **Permitir**.
+- As tarefas ficam guardadas no navegador do celular, **por endereço**: se o IP do computador mudar, a lista aparece vazia (é outro endereço).
+- Redes de faculdade/empresa às vezes impedem aparelhos de se verem; nesse caso use o roteador (hotspot) do celular ou o APK.
+- Limitação: pelo IP local (sem HTTPS) o navegador não registra o service worker, então "instalar como app"/offline pode não aparecer; "Adicionar à tela inicial" do navegador cria o atalho mesmo assim.
+
 ## Modo offline
 
 - Na **primeira visita** pela web, o `sw.js` guarda o app (HTML, CSS, JS e ícones) no cache. Depois disso ele abre sem internet.
@@ -177,6 +189,7 @@ Depois de cada mudança no código: `npm run ios:sync` (ou `npm run android:sync
 | `npm test` | testes automatizados |
 | `npm run build` | build web em `dist/` |
 | `npm run android:sync` | build + copia para o projeto Android |
+| `npm run celular` | serve o app na rede Wi-Fi e mostra o QR code para o celular |
 | `npm run android:apk` | build + sync + gera o APK de debug (Windows, Mac e Linux; precisa de JDK 21 e Android SDK) |
 | `npm run ios:sync` | build + copia para o projeto iOS (Mac) |
 | `npx cap open android` / `npx cap open ios` | abre o projeto no Android Studio / Xcode |
