@@ -308,3 +308,33 @@ ion-segment-button {
 ion-toast {
   --end: 88px;
 }
+
+/* ---------- aviso "Use como app" (Safari do iPhone/iPad) ---------- */
+.ios-aviso {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 10;
+  max-width: 696px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--ion-color-primary);
+  color: #fff;
+  font: 14px/1.35 var(--ion-font-family);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+.ios-aviso div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.ios-aviso strong { font-size: 15px; }
+.ios-aviso button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font: 600 14px var(--ion-font-family);
+}

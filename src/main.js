@@ -4,6 +4,7 @@ import { CATEGORIES, filterTasks, sortTasks, summarize, dueLabel, parseQuickAdd,
 import { createStore } from './store.js';
 import { createStorage } from './storage.js';
 import { registerServiceWorker } from './pwa.js';
+import { iniciarAvisoIOS } from './instalar-ios.js';
 
 setupIonic();
 
@@ -353,6 +354,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 registerServiceWorker();
+iniciarAvisoIOS();
 renderChips();
 store.init().catch((err) => {
   console.error(err);

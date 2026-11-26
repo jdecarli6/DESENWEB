@@ -58,8 +58,12 @@ const html = (urls, imgs) => `<!doctype html><html lang="pt-BR"><head><meta char
 code{font-size:1.5rem;background:#eee;padding:.3rem .6rem;border-radius:6px}ol{display:inline-block;text-align:left;font-size:1.1rem}</style></head><body>
 <h1>Abrir o Gerenciador de Tarefas no celular</h1>
 ${urls.map((u, i) => `<div><img src="${imgs[i]}" alt="QR code"><p><code>${u}</code></p></div>`).join('')}
-<ol><li>Deixe o celular no <b>mesmo Wi-Fi</b> deste computador.</li><li>Abra a <b>câmera</b> do celular.</li><li>Aponte para o QR code e toque no link.</li></ol>
-<p>Mantenha a janela do terminal aberta. Feche-a para desligar.</p></body></html>`;
+<h2>No iPhone, em 3 passos</h2>
+<ol><li>Aponte a <b>câmera</b> para o QR code e toque no link (abre no <b>Safari</b>).</li>
+<li>No Safari toque em <b>Compartilhar</b> (quadrado com seta) → <b>Adicionar à Tela de Início</b> → <b>Adicionar</b>.</li>
+<li>Abra pelo ícone <b>Tarefas</b>: abre em tela cheia, como um app.</li></ol>
+<p><b>Atenção:</b> o computador precisa ficar ligado, com a janela do terminal aberta e no <b>mesmo Wi-Fi</b> do celular. No iPhone use o <b>Safari</b> (outros navegadores podem não ter a opção).</p>
+<p>Feche a janela do terminal para desligar.</p></body></html>`;
 
 async function principal() {
   console.log('Gerando o app...');
@@ -89,7 +93,15 @@ async function principal() {
     console.log(`${urls[i]}   (${l.nome})`);
     qrcodeTerminal.generate(urls[i], { small: false });
   });
-  console.log('Deixe esta janela aberta. Feche-a para desligar.');
+  console.log('');
+  console.log('No iPhone, em 3 passos:');
+  console.log(' 1. Aponte a câmera para o QR code e toque no link (abre no Safari).');
+  console.log(' 2. No Safari: Compartilhar (quadrado com seta) > Adicionar à Tela de Início > Adicionar.');
+  console.log(' 3. Abra pelo ícone "Tarefas": abre em tela cheia, como um app.');
+  console.log('');
+  console.log('O computador precisa ficar ligado, com esta janela aberta e no mesmo Wi-Fi do celular.');
+  console.log('No iPhone use o Safari (outros navegadores podem não ter a opção).');
+  console.log('Feche esta janela para desligar.');
   abrirNoNavegador(pagina);
 }
 

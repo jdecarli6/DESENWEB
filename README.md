@@ -104,9 +104,15 @@ Sem instalar nada no celular: o computador que roda o sistema serve o app na red
 - Aparece um QR code no terminal e numa página do navegador (também salvo em `qrcode-celular.png`). No celular: abra a câmera e aponte para o QR.
 - Celular e computador precisam estar **no mesmo Wi-Fi**. O computador fica ligado com a janela aberta; feche a janela para desligar.
 - Na primeira vez o Windows pode perguntar se permite acesso à rede: marque **Redes privadas** e **Permitir**.
-- As tarefas ficam guardadas no navegador do celular, **por endereço**: se o IP do computador mudar, a lista aparece vazia (é outro endereço).
-- Redes de faculdade/empresa às vezes impedem aparelhos de se verem; nesse caso use o roteador (hotspot) do celular ou o APK.
-- Limitação: pelo IP local (sem HTTPS) o navegador não registra o service worker, então "instalar como app"/offline pode não aparecer; "Adicionar à tela inicial" do navegador cria o atalho mesmo assim.
+- **iPhone (como app, em tela cheia):** 1) aponte a câmera para o QR e toque no link (abre no **Safari**; outros navegadores do iPhone podem não ter a opção); 2) toque em **Compartilhar** (quadrado com seta) → **Adicionar à Tela de Início** → **Adicionar**; 3) a partir daí abra pelo ícone **Tarefas**, em tela cheia, sem a barra do Safari. No Safari o app mostra um aviso "Use como app" com esse caminho (pode fechá-lo; volta depois de 7 dias se ainda não estiver instalado).
+- **Android:** o menu do Chrome oferece "Adicionar à tela inicial"; ou instale o APK.
+- Redes de faculdade/empresa às vezes impedem aparelhos de se verem; nesse caso use o roteador (hotspot) do celular.
+
+Limitações honestas:
+
+- Sem HTTPS (endereço `http://IP:4173`) o modo offline (service worker) **não liga**: o app do ícone precisa do computador ligado, com a janela aberta e no mesmo Wi-Fi para abrir.
+- As tarefas ficam guardadas no iPhone, **ligadas ao endereço do computador**: se o IP mudar, é outro "app" com a lista vazia. O ideal é deixar o computador com IP fixo (reserva de DHCP no roteador, pelo endereço MAC dele).
+- Para funcionar em qualquer lugar, sem o computador, só publicando na internet com HTTPS (não foi feito aqui).
 
 ## Modo offline
 
