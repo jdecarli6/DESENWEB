@@ -19,5 +19,5 @@ function rodar(comando, args, cwd) {
 
 rodar(npx, ['vite', 'build'], raiz);
 rodar(npx, ['cap', 'sync', 'android'], raiz);
-rodar(windows ? 'gradlew.bat' : './gradlew', ['assembleDebug'], android);
+rodar(windows ? '.\\gradlew.bat' : './gradlew', ['assembleDebug'], android);
 console.log('\nAPK gerado em: android/app/build/outputs/apk/debug/app-debug.apk');
