@@ -103,25 +103,44 @@ npm run preview    # serve o dist/ gerado, para conferir o build
 - Os dados ficam no aparelho, então a lista continua disponível offline.
 - No app nativo (Android/iOS) o app já vem empacotado: funciona offline desde a instalação, e o service worker não é usado.
 
+## Requisitos e como rodar em outro computador
+
+- **Node.js 20 ou mais novo** (há um `.nvmrc` com a versão 22; com nvm: `nvm use`).
+- Baixe o projeto, entre na pasta e rode:
+
+```bash
+npm ci            # instala as dependências exatas do package-lock.json
+npm test          # testes automatizados
+npm run dev       # abre no navegador (servidor de desenvolvimento)
+# ou: npm run build && npm run preview   # versão de produção em servidor local
+```
+
+> **Atenção:** abrir `dist/index.html` com dois cliques **não funciona** (o navegador bloqueia scripts do tipo
+> módulo em `file://`). Use sempre `npm run dev` ou `npm run preview`, ou publique a pasta `dist/` num servidor.
+
 ## Android — gerar o APK
 
-**Requisitos (Windows):**
-1. **Node.js** LTS.
-2. **JDK 21** (o Android Studio já traz um JDK; pode-se também instalar o Temurin 21).
-3. **Android Studio** com o **Android SDK** instalado pelo SDK Manager: *Platform 35* e *Build-Tools* (o app compila com `compileSdk 35` e roda a partir do Android 6.0, `minSdk 23`).
-4. Variáveis de ambiente: `JAVA_HOME` apontando para o JDK e `ANDROID_HOME` apontando para o SDK
-   (ex.: `C:\Users\<usuario>\AppData\Local\Android\Sdk`).
+**Requisitos (Windows, Mac ou Linux):**
+1. **Node.js 20+**.
+2. **JDK 21** (o Android Studio já traz um; ou instale o Temurin 21). Java 8/11/17 não servem.
+3. **Android SDK**: *platform-tools*, *Platform 35* (`platforms;android-35`) e *Build-Tools* (ex.: `build-tools;35.0.0`),
+   instalados pelo SDK Manager do Android Studio ou pelas *command-line tools* (`sdkmanager`).
+   O app compila com `compileSdk 35` e roda a partir do Android 6.0 (`minSdk 23`).
+4. Diga onde está o SDK, de um destes jeitos:
+   - variável de ambiente `ANDROID_HOME` (ex.: `C:\Users\<usuario>\AppData\Local\Android\Sdk`); ou
+   - arquivo `android/local.properties` com `sdk.dir=<caminho do SDK>` (este arquivo não vai para o git).
+5. `JAVA_HOME` apontando para o JDK 21 (ou `org.gradle.java.home=<JDK 21>` em `~/.gradle/gradle.properties`).
 
 **Passos:**
 
 ```bash
-npm install
-npm run android:sync        # npm run build + npx cap sync android
-cd android
-.\gradlew.bat assembleDebug   # ou, na raiz: npm run android:apk
+npm ci
+npm run android:apk      # funciona igual em Windows, Mac e Linux
 ```
 
 APK gerado: `android/app/build/outputs/apk/debug/app-debug.apk`.
+É um APK de **teste** (assinado com a chave de debug). Para loja ou distribuição oficial é preciso assinatura própria
+e trocar o `appId` (`br.com.exemplo.tarefasinteligentes` é um nome de exemplo).
 
 Para instalar: copie o `.apk` para o celular Android, abra o arquivo e permita "instalar apps desconhecidos",
 ou use `adb install android/app/build/outputs/apk/debug/app-debug.apk` com depuração USB.
@@ -158,6 +177,6 @@ Depois de cada mudança no código: `npm run ios:sync` (ou `npm run android:sync
 | `npm test` | testes automatizados |
 | `npm run build` | build web em `dist/` |
 | `npm run android:sync` | build + copia para o projeto Android |
-| `npm run android:apk` | build + sync + gera o APK de debug (Windows, precisa de JDK e SDK) |
+| `npm run android:apk` | build + sync + gera o APK de debug (Windows, Mac e Linux; precisa de JDK 21 e Android SDK) |
 | `npm run ios:sync` | build + copia para o projeto iOS (Mac) |
 | `npx cap open android` / `npx cap open ios` | abre o projeto no Android Studio / Xcode |

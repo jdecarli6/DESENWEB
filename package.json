@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Gerenciador de Tarefas Inteligente (Ionic + Capacitor + Vite) para iOS e Android",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,7 +17,7 @@
     "assets": "npx @capacitor/assets generate --ios",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
-    "android:apk": "npm run build && npx cap sync android && cd android && .\\gradlew.bat assembleDebug"
+    "android:apk": "node scripts/android-apk.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.0",
